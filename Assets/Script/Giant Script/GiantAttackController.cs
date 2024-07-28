@@ -1,3 +1,4 @@
+//GOOD
 using System.Collections;
 using UnityEngine;
 
@@ -8,10 +9,16 @@ public class GiantAttackPattern : MonoBehaviour
     private float timeBetweenAttacks;
     private float attackTimer;
 
+    public Transform player; // Reference to the player's transform
+    private bool isPlayerInTrigger1;
+    private bool isPlayerInTrigger2;
+    private bool isPlayerInTrigger3;
+
     void Start()
     {
         animator = GetComponent<Animator>();
         SetStageParameters();
+        animator.SetTrigger("Idle"); // Start with idle animation
     }
 
     void Update()
@@ -19,7 +26,22 @@ public class GiantAttackPattern : MonoBehaviour
         attackTimer += Time.deltaTime;
         if (attackTimer >= timeBetweenAttacks)
         {
-            PerformRandomAttack();
+            if (isPlayerInTrigger1)
+            {
+                HandleTrigger1();
+            }
+            else if (isPlayerInTrigger2)
+            {
+                HandleTrigger2();
+            }
+            else if (isPlayerInTrigger3)
+            {
+                HandleTrigger3();
+            }
+            else
+            {
+                animator.SetTrigger("Idle");
+            }
             attackTimer = 0;
         }
 
@@ -62,38 +84,66 @@ public class GiantAttackPattern : MonoBehaviour
         }
     }
 
-    void PerformRandomAttack()
+    void HandleTrigger1()
     {
-        int attackType = Random.Range(0, 3); // 0 for Swing, 1 for Hammer, 2 for Swing-Hammer-Swing
-        animator.SetInteger("AttackType", attackType);
-
-        switch (attackType)
+        if (transform.localScale.x > 0)
         {
-            case 0:
-                animator.SetTrigger("Swing");
-                break;
+            PerformHammerAttack();
+        }
+        else
+        {
+            FlipGiant(2.5f);
+            PerformHammerAttack();
+        }
+    }
+
+    void HandleTrigger2()
+    {
+        if (transform.localScale.x < 0)
+        {
+            PerformHammerAttack();
+        }
+        else
+        {
+            FlipGiant(-2.5f);
+            PerformHammerAttack();
+        }
+    }
+
+    void HandleTrigger3()
+    {
+        PerformSwingAttack();
+    }
+
+    void PerformHammerAttack()
+    {
+        animator.SetTrigger("Hammer");
+    }
+
+    void PerformSwingAttack()
+    {
+        animator.SetTrigger("Swing");
+    }
+
+    void FlipGiant(float scaleX)
+    {
+        transform.localScale = new Vector3(scaleX, transform.localScale.y, transform.localScale.z);
+    }
+
+    public void SetPlayerInTrigger(int triggerID, bool isInTrigger)
+    {
+        switch (triggerID)
+        {
             case 1:
-                animator.SetTrigger("Hammer");
+                isPlayerInTrigger1 = isInTrigger;
                 break;
             case 2:
-                StartCoroutine(ComboAttack());
+                isPlayerInTrigger2 = isInTrigger;
+                break;
+            case 3:
+                isPlayerInTrigger3 = isInTrigger;
                 break;
         }
-        StartCoroutine(ReturnToIdle());
-    }
-
-    IEnumerator ComboAttack()
-    {
-        animator.SetTrigger("Swing");
-        yield return new WaitForSeconds(0.5f); // Adjust time according to animation length
-        animator.SetTrigger("Hammer");
-        yield return new WaitForSeconds(0.5f); // Adjust time according to animation length
-        animator.SetTrigger("Swing");
-    }
-
-    IEnumerator ReturnToIdle()
-    {
-        yield return new WaitForSeconds(1.0f); // Adjust time to match the longest attack animation
-        animator.SetTrigger("Idle");
     }
 }
+
