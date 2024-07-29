@@ -1,4 +1,3 @@
-//GOOD
 using System.Collections;
 using UnityEngine;
 
@@ -46,15 +45,15 @@ public class GiantAttackPattern : MonoBehaviour
         }
 
         // Update stage based on collected artifacts
-        if (playerArtifactsCollected >= 0 && playerArtifactsCollected < 1)
+        if (playerArtifactsCollected >= 0 && playerArtifactsCollected < 2)
         {
             SetStageParameters(1);
         }
-        else if (playerArtifactsCollected >= 1 && playerArtifactsCollected < 2)
+        else if (playerArtifactsCollected >= 1 && playerArtifactsCollected < 3)
         {
             SetStageParameters(2);
         }
-        else if (playerArtifactsCollected >= 2)
+        else if (playerArtifactsCollected >= 3)
         {
             SetStageParameters(3);
         }
@@ -75,11 +74,11 @@ public class GiantAttackPattern : MonoBehaviour
                 break;
             case 2:
                 timeBetweenAttacks = 1.5f;
-                animator.speed = 0.5f;
+                animator.speed = 0.4f;
                 break;
             case 3:
                 timeBetweenAttacks = 1.0f;
-                animator.speed = 1.0f;
+                animator.speed = 0.6f;
                 break;
         }
     }
@@ -146,4 +145,3 @@ public class GiantAttackPattern : MonoBehaviour
         }
     }
 }
-
