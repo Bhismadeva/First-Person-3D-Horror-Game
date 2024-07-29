@@ -1,27 +1,46 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using static UnityEditor.Progress;
 
 public class Puzzle : MonoBehaviour
 {
     public Camera playerCamera;
     public Camera doorCamera;
-    public GameObject ItemBoxCanvas;
+    public GameObject puzzleBoxCanvas;
+    private bool isPlayerInRange = false;
+    public GameObject RPopUp;
 
     private void Start()
     {
         // Ensure only one camera is active at start
         playerCamera.gameObject.SetActive(true);
         doorCamera.gameObject.SetActive(false);
-        ItemBoxCanvas.gameObject.SetActive(false);
+        puzzleBoxCanvas.gameObject.SetActive(false);
     }
     private void Update()
     {
         // Switch cameras when the user presses the "C" key
-        if (Input.GetKeyDown(KeyCode.R))
+        if (Input.GetKeyDown(KeyCode.F) && isPlayerInRange)
         {
             SwitchCameras();
+        }
+    }
+
+    void OnTriggerEnter(Collider other)
+    {
+        if (other.CompareTag("Player"))
+        {
+            isPlayerInRange = true;
+            RPopUp.SetActive(true);
+        }
+    }
+
+    void OnTriggerExit(Collider other)
+    {
+        if (other.CompareTag("Player"))
+        {
+            isPlayerInRange = false;
+            RPopUp.SetActive(false);
         }
     }
 
@@ -31,7 +50,7 @@ public class Puzzle : MonoBehaviour
         {
             playerCamera.gameObject.SetActive(false);
             doorCamera.gameObject.SetActive(true);
-            ItemBoxCanvas.gameObject.SetActive(true);
+            puzzleBoxCanvas.gameObject.SetActive(true);
 
             // Activate Cursor
             Cursor.lockState = CursorLockMode.None;
@@ -43,7 +62,7 @@ public class Puzzle : MonoBehaviour
         {
             playerCamera.gameObject.SetActive(true);
             doorCamera.gameObject.SetActive(false);
-            ItemBoxCanvas.gameObject.SetActive(false);
+            puzzleBoxCanvas.gameObject.SetActive(false);
 
             Cursor.lockState = CursorLockMode.Locked;
             Cursor.visible = false;

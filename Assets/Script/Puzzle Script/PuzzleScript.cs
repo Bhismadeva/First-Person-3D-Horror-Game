@@ -1,17 +1,20 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.UIElements;
-using static UnityEditor.Progress;
 
 public class PuzzleScript : MonoBehaviour
 {
     public Transform puzzleContent;
     public List<Transform> itemSlots = new List<Transform>();
     public List<Items> items = new List<Items>();
+    public int correctPlace;
+    public GameObject Door;
+    public Material newDoorMaterial;
 
     private bool[] slotChecked;
-    private int totalRightItem = 0;
+    private bool isPuzzleSolved = false;
 
     public void Start()
     {
@@ -38,17 +41,23 @@ public class PuzzleScript : MonoBehaviour
 
     public void Update()
     {
-        foreach (Transform slot in itemSlots)
+        if (!isPuzzleSolved)
         {
-            if (slot.childCount > 0)
+            foreach (Transform slot in itemSlots)
             {
-                CheckPuzzle();
+                if (slot.childCount > 0)
+                {
+                    CheckPuzzle();
+                }
             }
         }
     }
 
     public void CheckPuzzle()
     {
+
+        int correctSlotsCount = 0;
+
         for (int i = 0; i < itemSlots.Count; i++)
         {
             Transform slot = itemSlots[i];
@@ -61,12 +70,26 @@ public class PuzzleScript : MonoBehaviour
                     int itemId = item.GetComponent<ItemValue>().itemId;
                     if (i == itemId)
                     {
-                        totalRightItem++;
                         slotChecked[i] = true;
-                        Debug.Log("Place already match");
+                        Debug.Log("1 Place match");
+
                     }
                 }
             }
+
+            if (slotChecked[i])
+            {
+                correctSlotsCount++;
+            }
+        }
+
+        if (correctSlotsCount == correctPlace && !isPuzzleSolved)
+        {
+            Debug.Log("Pintu Terbuka");
+            Renderer mydoor = Door.GetComponent<Renderer>();
+            mydoor.material = newDoorMaterial;
+            isPuzzleSolved = true; // Set the flag to prevent further checks
+            // You can add additional actions here, such as opening a door or triggering an event
         }
     }
 
