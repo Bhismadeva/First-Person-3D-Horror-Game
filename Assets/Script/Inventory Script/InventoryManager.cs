@@ -78,7 +78,7 @@ public class InventoryManager : MonoBehaviour
             {
                 GameObject obj = Instantiate(InventoryItem, itemSlots[slotIndex]);
 
-                /*obj.GetComponent<ItemValue>().itemId = item.id;*/
+                obj.GetComponent<ItemValue>().itemId = item.id;
                 obj.GetComponent<UnityEngine.UI.Image>().sprite = item.icon;
 
                 slotIndex++;
