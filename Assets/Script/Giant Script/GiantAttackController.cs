@@ -13,17 +13,18 @@ public class GiantAttackPattern : MonoBehaviour
     private bool isPlayerInTrigger2;
     private bool isPlayerInTrigger3;
 
+    private bool isAttacking = false;
+
     void Start()
     {
         animator = GetComponent<Animator>();
-        SetStageParameters();
-        animator.SetTrigger("Idle"); // Start with idle animation
+        SetStageParameters(playerArtifactsCollected); // Set initial parameters based on artifacts collected
     }
 
     void Update()
     {
         attackTimer += Time.deltaTime;
-        if (attackTimer >= timeBetweenAttacks)
+        if (attackTimer >= timeBetweenAttacks && !isAttacking)
         {
             if (isPlayerInTrigger1)
             {
@@ -39,94 +40,119 @@ public class GiantAttackPattern : MonoBehaviour
             }
             else
             {
-                animator.SetTrigger("Idle");
+                SetIdleState();
             }
             attackTimer = 0;
         }
 
         // Update stage based on collected artifacts
-        if (playerArtifactsCollected >= 0 && playerArtifactsCollected < 2)
-        {
-            SetStageParameters(1);
-        }
-        else if (playerArtifactsCollected >= 1 && playerArtifactsCollected < 3)
-        {
-            SetStageParameters(2);
-        }
-        else if (playerArtifactsCollected >= 3)
-        {
-            SetStageParameters(3);
-        }
+        SetStageParameters(playerArtifactsCollected);
     }
 
-    void SetStageParameters()
+    void SetStageParameters(int artifactsCollected)
     {
-        SetStageParameters(playerArtifactsCollected >= 2 ? 3 : playerArtifactsCollected >= 1 ? 2 : 1);
-    }
-
-    void SetStageParameters(int stage)
-    {
-        switch (stage)
+        switch (artifactsCollected)
         {
             case 1:
                 timeBetweenAttacks = 2.0f;
-                animator.speed = 0.2f;
+                animator.speed = 0.2f; // Set global speed
+                animator.SetFloat("IdleSpeed", 0.8f); // Set idle animation speed
                 break;
             case 2:
                 timeBetweenAttacks = 1.5f;
-                animator.speed = 0.4f;
+                animator.speed = 1.0f; // Set global speed
+                animator.SetFloat("IdleSpeed", 0.9f); // Set idle animation speed
                 break;
             case 3:
                 timeBetweenAttacks = 1.0f;
-                animator.speed = 0.6f;
+                animator.speed = 0.4f; // Set global speed
+                animator.SetFloat("IdleSpeed", 1f); // Set idle animation speed
+                break;
+            default:
+                timeBetweenAttacks = 2.0f;
+                animator.speed = 0.6f; // Set global speed
+                animator.SetFloat("IdleSpeed", 0.8f); // Set idle animation speed
                 break;
         }
     }
 
     void HandleTrigger1()
     {
-        if (transform.localScale.x > 0)
+        if (animator.GetCurrentAnimatorStateInfo(0).IsName("Idle"))
         {
-            PerformHammerAttack();
-        }
-        else
-        {
-            FlipGiant(2.5f);
-            PerformHammerAttack();
+            animator.SetBool("IsIdle", false);
+            if (transform.localScale.x > 0)
+            {
+                PerformHammerAttack();
+            }
+            else
+            {
+                FlipGiant(2.5f);
+                PerformHammerAttack();
+            }
         }
     }
 
     void HandleTrigger2()
     {
-        if (transform.localScale.x < 0)
+        if (animator.GetCurrentAnimatorStateInfo(0).IsName("Idle"))
         {
-            PerformHammerAttack();
-        }
-        else
-        {
-            FlipGiant(-2.5f);
-            PerformHammerAttack();
+            animator.SetBool("IsIdle", false);
+            if (transform.localScale.x < 0)
+            {
+                PerformHammerAttack();
+            }
+            else
+            {
+                FlipGiant(-2.5f);
+                PerformHammerAttack();
+            }
         }
     }
 
     void HandleTrigger3()
     {
-        PerformSwingAttack();
+        if (animator.GetCurrentAnimatorStateInfo(0).IsName("Idle"))
+        {
+            animator.SetBool("IsIdle", false);
+            PerformSwingAttack();
+        }
     }
 
     void PerformHammerAttack()
     {
+        isAttacking = true;
         animator.SetTrigger("Hammer");
     }
 
     void PerformSwingAttack()
     {
+        isAttacking = true;
         animator.SetTrigger("Swing");
+    }
+
+    void SetIdleState()
+    {
+        if (!isAttacking)
+        {
+            animator.SetBool("IsIdle", true);
+        }
     }
 
     void FlipGiant(float scaleX)
     {
-        transform.localScale = new Vector3(scaleX, transform.localScale.y, transform.localScale.z);
+        // Only flip if not currently performing an attack
+        if (!isAttacking)
+        {
+            transform.localScale = new Vector3(scaleX, transform.localScale.y, transform.localScale.z);
+        }
+    }
+
+    // This method should be called when an attack animation ends
+    public void OnAttackAnimationEnd()
+    {
+        isAttacking = false;
+        SetIdleState();
     }
 
     public void SetPlayerInTrigger(int triggerID, bool isInTrigger)
