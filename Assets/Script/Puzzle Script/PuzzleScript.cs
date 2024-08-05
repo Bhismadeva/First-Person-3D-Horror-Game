@@ -3,16 +3,20 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.UIElements;
+using static UnityEditor.Progress;
 
 public class PuzzleScript : MonoBehaviour
 {
+    public static PuzzleScript Instance;
+
     public Transform puzzleContent;
     public List<Transform> itemSlots = new List<Transform>();
     public List<Items> items = new List<Items>();
-    public int correctPlace;
+
     public GameObject Door;
     public Material newDoorMaterial;
 
+    public int correctPlace;
     private bool[] slotChecked;
     private bool isPuzzleSolved = false;
 
@@ -29,14 +33,61 @@ public class PuzzleScript : MonoBehaviour
         slotChecked = new bool[itemSlots.Count];
     }
 
+    public void Awake()
+    {
+        Instance = this;
+    }
+
+    public Items GetItems(int Id)
+    {
+        foreach (Items item in items)
+        {
+            if (item.id == Id) return item;
+
+        }
+        return null;
+    }
+
     public void Add(Items item)
     {
-        items.Add(item);
+        bool itemExists = false;
+
+        foreach (Items existingItem in items)
+        {
+            if (existingItem.id == item.id)
+            {
+                itemExists = true;
+                break; // Keluar dari loop setelah menemukan item dengan ID yang sama
+            }
+        }
+
+        // Jika item tidak ada dalam daftar, tambahkan item baru
+        if (!itemExists)
+        {
+            items.Add(item);
+        }
     }
 
     public void Remove(Items item)
     {
-        items.Remove(item);
+        bool itemExists = false;
+        Items itemToRemove = null;
+
+        foreach (Items existingItem in items)
+        {
+            if (existingItem.id == item.id)
+            {
+                itemExists = true;
+                itemToRemove = existingItem;
+                break; // Keluar dari loop setelah menemukan item dengan ID yang sama
+            }
+        }
+
+        // Jika item ada dalam daftar, hapus item tersebut
+        if (itemExists)
+        {
+            items.Remove(itemToRemove);
+        }
     }
 
     public void Update()

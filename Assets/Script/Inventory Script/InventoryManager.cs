@@ -5,6 +5,7 @@ using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.UIElements;
+using static UnityEditor.Progress;
 
 public class InventoryManager : MonoBehaviour
 {
@@ -13,6 +14,7 @@ public class InventoryManager : MonoBehaviour
     public GameObject inventoryPanel;
     public Transform ItemContent;
     public GameObject InventoryItem;
+
     public List<Items> Items = new List<Items>();
     public List<Transform> itemSlots = new List<Transform>(); // List of item slots
 
@@ -30,6 +32,11 @@ public class InventoryManager : MonoBehaviour
         }
     }
 
+    public void Awake()
+    {
+        Instance = this;
+    }
+
     void Update()
     {
         if (Input.GetKeyDown(KeyCode.Tab))
@@ -39,20 +46,56 @@ public class InventoryManager : MonoBehaviour
         }
     }
 
-    public void Awake()
+    public Items GetItems(int Id)
     {
-        Instance = this;
+        foreach (Items item in Items)
+        {
+            if (item.id == Id) return item;
+
+        }
+        return null;
     }
 
     public void Add(Items item)
     {
-        Items.Add(item);
+        bool itemExists = false;
+
+        foreach (Items existingItem in Items)
+        {
+            if (existingItem.id == item.id)
+            {
+                itemExists = true;
+                break; // Keluar dari loop setelah menemukan item dengan ID yang sama
+            }
+        }
+
+        // Jika item tidak ada dalam daftar, tambahkan item baru
+        if (!itemExists)
+        {
+            Items.Add(item);
+        }
     }
 
     public void Remove(Items item)
     {
+        bool itemExists = false;
+        Items itemToRemove = null;
 
-        Items.Remove(item);
+        foreach (Items existingItem in Items)
+        {
+            if (existingItem.id == item.id)
+            {
+                itemExists = true;
+                itemToRemove = existingItem;
+                break; // Keluar dari loop setelah menemukan item dengan ID yang sama
+            }
+        }
+
+        // Jika item ada dalam daftar, hapus item tersebut
+        if (itemExists)
+        {
+            Items.Remove(itemToRemove);
+        }
     }
 
     public void ListItems()
